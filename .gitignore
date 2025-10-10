@@ -1,0 +1,54 @@
+# Database/Dataset folders
+medicinal plant leaf set/
+removed background/
+
+# Model results and outputs
+vgg19_results/
+resnet50_results/
+densenet121_results/
+mobilenet_results/
+model_comparison_results/
+
+# TensorBoard logs
+**/logs/
+**/logs_finetune/
+
+# Model files
+*.h5
+*.pkl
+*.keras
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
