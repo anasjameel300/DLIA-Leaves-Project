@@ -15,9 +15,8 @@ def run_training_script(script_name, model_name):
     print(f"Start time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     try:
-        # Run the training script
-        result = subprocess.run([sys.executable, script_name], 
-                              capture_output=True, text=True, timeout=7200)  # 2 hour timeout
+        # Run the training script with real-time output
+        result = subprocess.run([sys.executable, script_name], timeout=7200)  # 2 hour timeout
         
         if result.returncode == 0:
             print(f"\n[SUCCESS] {model_name} training completed successfully!")
@@ -25,7 +24,6 @@ def run_training_script(script_name, model_name):
             return True
         else:
             print(f"\n[FAILED] {model_name} training failed!")
-            print(f"Error output: {result.stderr}")
             return False
             
     except subprocess.TimeoutExpired:
@@ -144,8 +142,7 @@ def main():
         print(f"{'='*80}")
         
         try:
-            result = subprocess.run([sys.executable, "model_comparison.py"], 
-                                  capture_output=True, text=True, timeout=300)  # 5 minute timeout
+            result = subprocess.run([sys.executable, "model_comparison.py"], timeout=300)  # 5 minute timeout
             
             if result.returncode == 0:
                 print("[SUCCESS] Model comparison completed successfully!")
@@ -162,7 +159,6 @@ def main():
                 print("  - model_comparison_results/*.png (visualization plots)")
             else:
                 print("[FAILED] Model comparison failed!")
-                print(f"Error: {result.stderr}")
                 
         except subprocess.TimeoutExpired:
             print("[TIMEOUT] Model comparison timed out")
