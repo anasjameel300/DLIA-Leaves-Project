@@ -26,9 +26,9 @@ class ModelComparator:
             if os.path.exists(results_path):
                 with open(results_path, 'rb') as f:
                     self.results[model_name] = pickle.load(f)
-                print(f"✓ Loaded {model_name} results")
+                print(f"[OK] Loaded {model_name} results")
             else:
-                print(f"⚠ {model_name} results not found at {results_path}")
+                print(f"[WARNING] {model_name} results not found at {results_path}")
                 
         print(f"\nLoaded results for {len(self.results)} models")
         
@@ -77,7 +77,7 @@ class ModelComparator:
         # Sort by validation accuracy
         self.comparison_data = self.comparison_data.sort_values('Validation Accuracy', ascending=False)
         
-        print("✓ Comparison data created")
+        print("[OK] Comparison data created")
         return self.comparison_data
     
     def _calculate_convergence_epochs(self, val_acc_history):
@@ -261,7 +261,7 @@ class ModelComparator:
         plt.savefig('model_comparison_results/confusion_matrices_comparison.png', dpi=300, bbox_inches='tight')
         plt.close()
         
-        print("✓ All visualizations created and saved")
+        print("[OK] All visualizations created and saved")
         
     def create_detailed_report(self):
         """Create a detailed comparison report"""
@@ -271,7 +271,7 @@ class ModelComparator:
         
         # Save comparison data
         self.comparison_data.to_csv('model_comparison_results/model_comparison_summary.csv', index=False)
-        print("✓ Comparison summary saved to CSV")
+        print("[OK] Comparison summary saved to CSV")
         
         # Create detailed report
         report = []
@@ -341,7 +341,7 @@ class ModelComparator:
         with open('model_comparison_results/comparison_report.txt', 'w') as f:
             f.write('\n'.join(report))
         
-        print("✓ Detailed report saved")
+        print("[OK] Detailed report saved")
         
         # Print summary to console
         print("\n" + "="*80)

@@ -42,20 +42,20 @@ class MobileNetTrainer:
         
         gpus = tf.config.list_physical_devices('GPU')
         if gpus:
-            print(f"✓ Found {len(gpus)} GPU(s):")
+            print(f"[OK] Found {len(gpus)} GPU(s):")
             for gpu in gpus:
                 print(f"  - {gpu.name}")
             
             # Enable memory growth to avoid OOM errors
             for gpu in gpus:
                 tf.config.experimental.set_memory_growth(gpu, True)
-            print("✓ GPU memory growth enabled")
+            print("[OK] GPU memory growth enabled")
             
             # Set mixed precision for faster training
             tf.keras.mixed_precision.set_global_policy('mixed_float16')
-            print("✓ Mixed precision enabled for faster training")
+            print("[OK] Mixed precision enabled for faster training")
         else:
-            print("⚠ No GPU found, using CPU")
+            print("[WARNING] No GPU found, using CPU")
             
         print(f"TensorFlow version: {tf.__version__}")
         print("="*60)
@@ -139,12 +139,12 @@ class MobileNetTrainer:
             input_shape=(*self.img_size, 3)
         )
         
-        print(f"✓ Loaded pre-trained MobileNet")
-        print(f"✓ Base model parameters: {base_model.count_params():,}")
+        print(f"[OK] Loaded pre-trained MobileNet")
+        print(f"[OK] Base model parameters: {base_model.count_params():,}")
         
         # Freeze base model layers
         base_model.trainable = False
-        print("✓ Frozen base model layers")
+        print("[OK] Frozen base model layers")
         
         # Create new model
         inputs = tf.keras.Input(shape=(*self.img_size, 3))
@@ -160,9 +160,9 @@ class MobileNetTrainer:
         
         self.model = Model(inputs, outputs)
         
-        print(f"✓ Model built successfully")
-        print(f"✓ Total parameters: {self.model.count_params():,}")
-        print(f"✓ Trainable parameters: {sum([tf.keras.backend.count_params(w) for w in self.model.trainable_weights]):,}")
+        print(f"[OK] Model built successfully")
+        print(f"[OK] Total parameters: {self.model.count_params():,}")
+        print(f"[OK] Trainable parameters: {sum([tf.keras.backend.count_params(w) for w in self.model.trainable_weights]):,}")
         
         # Compile model
         self.model.compile(
@@ -171,7 +171,7 @@ class MobileNetTrainer:
             metrics=['accuracy']
         )
         
-        print("✓ Model compiled successfully")
+        print("[OK] Model compiled successfully")
     
     def calculate_class_weights(self):
         """Calculate class weights to handle imbalanced datasets"""
@@ -195,7 +195,7 @@ class MobileNetTrainer:
         )
         
         self.class_weights = dict(enumerate(weights))
-        print(f"\n✓ Class weights calculated for balanced training")
+        print(f"\n[OK] Class weights calculated for balanced training")
         print(f"  Weight range: {min(weights):.2f} - {max(weights):.2f}")
         
     def train_model(self, epochs=50, fine_tune_epochs=10):
@@ -251,7 +251,7 @@ class MobileNetTrainer:
             verbose=1
         )
         
-        print("✓ Phase 1 training completed!")
+        print("[OK] Phase 1 training completed!")
         
         # Phase 2: Fine-tuning
         print("\n" + "="*60)
@@ -266,8 +266,8 @@ class MobileNetTrainer:
         for layer in base_model.layers[:-8]:
             layer.trainable = False
         
-        print(f"✓ Unfroze last 8 layers of base model for fine-tuning")
-        print(f"✓ Trainable parameters: {sum([tf.keras.backend.count_params(w) for w in self.model.trainable_weights]):,}")
+        print(f"[OK] Unfroze last 8 layers of base model for fine-tuning")
+        print(f"[OK] Trainable parameters: {sum([tf.keras.backend.count_params(w) for w in self.model.trainable_weights]):,}")
         
         # Recompile with lower learning rate
         self.model.compile(
@@ -276,7 +276,7 @@ class MobileNetTrainer:
             metrics=['accuracy']
         )
         
-        print("✓ Model recompiled with lower learning rate (0.00005) and gradient clipping")
+        print("[OK] Model recompiled with lower learning rate (0.00005) and gradient clipping")
         
         # Callbacks for phase 2
         callbacks_phase2 = [
@@ -318,7 +318,7 @@ class MobileNetTrainer:
             verbose=1
         )
         
-        print("✓ Phase 2 fine-tuning completed!")
+        print("[OK] Phase 2 fine-tuning completed!")
         
         # Combine histories
         for key in self.history.history.keys():
@@ -387,8 +387,8 @@ class MobileNetTrainer:
             }
         }
         
-        print(f"✓ Model evaluation completed")
-        print(f"✓ Final Validation Accuracy: {val_accuracy:.4f}")
+        print(f"[OK] Model evaluation completed")
+        print(f"[OK] Final Validation Accuracy: {val_accuracy:.4f}")
         
     def save_results(self):
         """Save all results and visualizations"""
@@ -401,12 +401,12 @@ class MobileNetTrainer:
         
         # Save model
         self.model.save('mobilenet_results/mobilenet_final_model.h5')
-        print("✓ Model saved")
+        print("[OK] Model saved")
         
         # Save results dictionary
         with open('mobilenet_results/mobilenet_results.pkl', 'wb') as f:
             pickle.dump(self.results, f)
-        print("✓ Results dictionary saved")
+        print("[OK] Results dictionary saved")
         
         # Save results as JSON (for easy reading)
         json_results = self.results.copy()
@@ -414,12 +414,12 @@ class MobileNetTrainer:
         json_results['confusion_matrix'] = self.results['confusion_matrix']
         with open('mobilenet_results/mobilenet_results.json', 'w') as f:
             json.dump(json_results, f, indent=2)
-        print("✓ Results JSON saved")
+        print("[OK] Results JSON saved")
         
         # Create visualizations
         self.create_visualizations()
         
-        print("✓ All results saved in 'mobilenet_results' folder")
+        print("[OK] All results saved in 'mobilenet_results' folder")
         
     def create_visualizations(self):
         """Create and save training visualizations"""
@@ -477,7 +477,7 @@ class MobileNetTrainer:
         report_df = pd.DataFrame(self.results['classification_report']).transpose()
         report_df.to_csv('mobilenet_results/mobilenet_classification_report.csv')
         
-        print("✓ Visualizations created and saved")
+        print("[OK] Visualizations created and saved")
         
     def run_training_pipeline(self, epochs=50):
         """Run the complete training pipeline"""
