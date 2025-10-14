@@ -15,8 +15,8 @@ def run_training_script(script_name, model_name):
     print(f"Start time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     try:
-        # Run the training script with real-time output
-        result = subprocess.run([sys.executable, script_name], timeout=7200)  # 2 hour timeout
+        # Run the training script with real-time output (no timeout limit)
+        result = subprocess.run([sys.executable, script_name])
         
         if result.returncode == 0:
             print(f"\n[SUCCESS] {model_name} training completed successfully!")
@@ -27,7 +27,7 @@ def run_training_script(script_name, model_name):
             return False
             
     except subprocess.TimeoutExpired:
-        print(f"\n[TIMEOUT] {model_name} training timed out after 2 hours")
+        print(f"\n[TIMEOUT] {model_name} training timed out")
         return False
     except Exception as e:
         print(f"\n[ERROR] Error running {model_name} training: {e}")

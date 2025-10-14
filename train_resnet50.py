@@ -76,15 +76,18 @@ class ResNet50Trainer:
             num_images = len([f for f in os.listdir(class_path) if f.endswith('.png')])
             print(f"  {i+1:2d}. {class_name:<20} - {num_images:4d} images")
         
-        # Data augmentation for training
+        # Enhanced data augmentation for training to prevent overfitting
         train_datagen = ImageDataGenerator(
             rescale=1./255,
-            rotation_range=20,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            shear_range=0.2,
-            zoom_range=0.2,
+            rotation_range=30,  # Increased from 20
+            width_shift_range=0.3,  # Increased from 0.2
+            height_shift_range=0.3,  # Increased from 0.2
+            shear_range=0.3,  # Increased from 0.2
+            zoom_range=0.3,  # Increased from 0.2
             horizontal_flip=True,
+            vertical_flip=True,  # Added vertical flip
+            brightness_range=[0.8, 1.2],  # Added brightness variation
+            channel_shift_range=0.1,  # Added channel shift
             fill_mode='nearest',
             validation_split=0.2
         )
@@ -146,17 +149,29 @@ class ResNet50Trainer:
         base_model.trainable = False
         print("[OK] Frozen base model layers")
         
-        # Create new model
+        # Create new model with enhanced regularization
         inputs = tf.keras.Input(shape=(*self.img_size, 3))
         x = base_model(inputs, training=False)
         x = GlobalAveragePooling2D()(x)
-        x = Dense(512, activation='relu')(x)
+        
+        # First dense block with enhanced regularization
+        x = Dense(1024, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001))(x)
+        x = BatchNormalization()(x)
+        x = Dropout(0.6)(x)  # Increased dropout
+        
+        # Second dense block
+        x = Dense(512, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001))(x)
         x = BatchNormalization()(x)
         x = Dropout(0.5)(x)
-        x = Dense(256, activation='relu')(x)
+        
+        # Third dense block
+        x = Dense(256, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001))(x)
         x = BatchNormalization()(x)
-        x = Dropout(0.3)(x)
-        outputs = Dense(len(self.class_names), activation='softmax')(x)
+        x = Dropout(0.4)(x)
+        
+        # Output layer with L2 regularization
+        outputs = Dense(len(self.class_names), activation='softmax', 
+                       kernel_regularizer=tf.keras.regularizers.l2(0.001))(x)
         
         self.model = Model(inputs, outputs)
         
@@ -164,9 +179,9 @@ class ResNet50Trainer:
         print(f"[OK] Total parameters: {self.model.count_params():,}")
         print(f"[OK] Trainable parameters: {sum([tf.keras.backend.count_params(w) for w in self.model.trainable_weights]):,}")
         
-        # Compile model
+        # Compile model with L2 regularization
         self.model.compile(
-            optimizer=Adam(learning_rate=0.001),
+            optimizer=Adam(learning_rate=0.001, decay=1e-6),  # Added weight decay
             loss='categorical_crossentropy',
             metrics=['accuracy']
         )
@@ -221,7 +236,7 @@ class ResNet50Trainer:
             ),
             EarlyStopping(
                 monitor='val_loss',
-                patience=12,
+                patience=8,  # Reduced from 12 to prevent overfitting
                 restore_best_weights=True,
                 verbose=1
             ),
@@ -269,9 +284,9 @@ class ResNet50Trainer:
         print(f"[OK] Unfroze last 10 layers of base model for fine-tuning")
         print(f"[OK] Trainable parameters: {sum([tf.keras.backend.count_params(w) for w in self.model.trainable_weights]):,}")
         
-        # Recompile with lower learning rate
+        # Recompile with lower learning rate and enhanced regularization
         self.model.compile(
-            optimizer=Adam(learning_rate=0.00005, clipnorm=1.0),  # Lower LR + gradient clipping
+            optimizer=Adam(learning_rate=0.00005, decay=1e-6, clipnorm=1.0),  # Added weight decay
             loss='categorical_crossentropy',
             metrics=['accuracy']
         )
@@ -289,7 +304,7 @@ class ResNet50Trainer:
             ),
             EarlyStopping(
                 monitor='val_loss',
-                patience=8,
+                patience=5,  # Reduced for fine-tuning phase
                 restore_best_weights=True,
                 verbose=1
             ),
