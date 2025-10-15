@@ -80,30 +80,30 @@ class ComprehensiveModelComparator:
         
         try:
             # Load model
-            print(f"🔄 Loading {model_name} model...")
+            print(f"[LOADING] {model_name} model...")
             start_time = time.time()
             model = tf.keras.models.load_model(model_path)
             load_time = time.time() - start_time
             
-            print(f"✅ Model loaded in {load_time:.2f} seconds")
+            print(f"[SUCCESS] Model loaded in {load_time:.2f} seconds")
             
             # Get model info
             total_params = model.count_params()
             trainable_params = sum([tf.keras.backend.count_params(w) for w in model.trainable_weights])
             
             # Evaluate model
-            print("🔄 Evaluating on validation set...")
+            print("[EVALUATING] On validation set...")
             eval_start = time.time()
             val_loss, val_accuracy = model.evaluate(self.val_generator, verbose=0)
             eval_time = time.time() - eval_start
-            print(f"✅ Evaluation completed in {eval_time:.2f} seconds")
+            print(f"[SUCCESS] Evaluation completed in {eval_time:.2f} seconds")
             
             # Get predictions
-            print("🔄 Generating predictions...")
+            print("[GENERATING] Predictions...")
             pred_start = time.time()
             predictions = model.predict(self.val_generator, verbose=0)
             pred_time = time.time() - pred_start
-            print(f"✅ Predictions generated in {pred_time:.2f} seconds")
+            print(f"[SUCCESS] Predictions generated in {pred_time:.2f} seconds")
             
             y_pred = np.argmax(predictions, axis=1)
             y_true = self.val_generator.classes
@@ -122,6 +122,11 @@ class ComprehensiveModelComparator:
             # Calculate inference speed (images per second)
             inference_speed = len(y_true) / pred_time
             
+            # Calculate time complexity metrics
+            time_per_image = pred_time / len(y_true)
+            time_per_parameter = pred_time / total_params if total_params > 0 else 0
+            efficiency_score = val_accuracy / (pred_time / len(y_true))  # Accuracy per second
+            
             # Memory usage (simplified without psutil)
             memory_usage = 1000  # Placeholder value
             
@@ -139,6 +144,9 @@ class ComprehensiveModelComparator:
                 'evaluation_time': eval_time,
                 'prediction_time': pred_time,
                 'inference_speed': inference_speed,
+                'time_per_image': time_per_image,
+                'time_per_parameter': time_per_parameter,
+                'efficiency_score': efficiency_score,
                 'memory_usage_mb': memory_usage,
                 'class_report': class_report,
                 'confusion_matrix': cm.tolist(),
@@ -147,16 +155,18 @@ class ComprehensiveModelComparator:
                 'class_names': self.class_names
             }
             
-            print(f"\n📊 [RESULTS] {model_name}:")
-            print(f"  ✅ Validation Accuracy: {val_accuracy:.4f}")
-            print(f"  📉 Validation Loss: {val_loss:.4f}")
-            print(f"  🎯 Precision: {precision:.4f}")
-            print(f"  🔍 Recall: {recall:.4f}")
-            print(f"  ⚖️ F1-Score: {f1:.4f}")
-            print(f"  🔢 Total Parameters: {total_params:,}")
-            print(f"  🎛️ Trainable Parameters: {trainable_params:,}")
-            print(f"  ⚡ Inference Speed: {inference_speed:.2f} images/sec")
-            print(f"  💾 Memory Usage: {memory_usage:.2f} MB")
+            print(f"\n[RESULTS] {model_name}:")
+            print(f"  [ACCURACY] Validation Accuracy: {val_accuracy:.4f}")
+            print(f"  [LOSS] Validation Loss: {val_loss:.4f}")
+            print(f"  [PRECISION] Precision: {precision:.4f}")
+            print(f"  [RECALL] Recall: {recall:.4f}")
+            print(f"  [F1-SCORE] F1-Score: {f1:.4f}")
+            print(f"  [PARAMETERS] Total Parameters: {total_params:,}")
+            print(f"  [TRAINABLE] Trainable Parameters: {trainable_params:,}")
+            print(f"  [SPEED] Inference Speed: {inference_speed:.2f} images/sec")
+            print(f"  [TIME] Time per Image: {time_per_image:.4f} seconds")
+            print(f"  [EFFICIENCY] Efficiency Score: {efficiency_score:.2f} (accuracy/sec)")
+            print(f"  [MEMORY] Memory Usage: {memory_usage:.2f} MB")
             
             return result
             
@@ -171,19 +181,19 @@ class ComprehensiveModelComparator:
         print("="*80)
         
         for i, model_name in enumerate(self.models, 1):
-            print(f"\n🔄 Processing model {i}/{len(self.models)}: {model_name}")
+            print(f"\n[PROCESSING] Model {i}/{len(self.models)}: {model_name}")
             model_path = self.model_files[model_name]
             if os.path.exists(model_path):
                 result = self.evaluate_model_performance(model_path, model_name)
                 if result:
                     self.results[model_name] = result
-                    print(f"✅ {model_name} evaluation completed!")
+                    print(f"[SUCCESS] {model_name} evaluation completed!")
                 else:
-                    print(f"❌ {model_name} evaluation failed!")
+                    print(f"[FAILED] {model_name} evaluation failed!")
             else:
-                print(f"⚠️ [WARNING] {model_path} not found!")
+                print(f"[WARNING] {model_path} not found!")
             
-            print(f"📈 Progress: {i}/{len(self.models)} models processed")
+            print(f"[PROGRESS] {i}/{len(self.models)} models processed")
     
     def create_comparison_dataframe(self):
         """Create comprehensive comparison dataframe"""
@@ -207,6 +217,9 @@ class ComprehensiveModelComparator:
                 'Evaluation Time (s)': result['evaluation_time'],
                 'Prediction Time (s)': result['prediction_time'],
                 'Inference Speed (img/s)': result['inference_speed'],
+                'Time per Image (s)': result['time_per_image'],
+                'Time per Parameter (s)': result['time_per_parameter'],
+                'Efficiency Score': result['efficiency_score'],
                 'Memory Usage (MB)': result['memory_usage_mb']
             }
             comparison_data.append(row)
@@ -217,48 +230,53 @@ class ComprehensiveModelComparator:
     def create_visualizations(self):
         """Create comprehensive visualizations"""
         print("\n" + "="*60)
-        print("🎨 CREATING VISUALIZATIONS")
+        print("CREATING VISUALIZATIONS")
         print("="*60)
         
         # Set style
         plt.style.use('seaborn-v0_8')
         
         # 1. Model Performance Comparison
-        print("🔄 Creating performance comparison charts...")
+        print("[CREATING] Performance comparison charts...")
         self.plot_performance_comparison()
-        print("✅ Performance comparison completed")
+        print("[SUCCESS] Performance comparison completed")
         
         # 2. Model Complexity Analysis
-        print("🔄 Creating complexity analysis charts...")
+        print("[CREATING] Complexity analysis charts...")
         self.plot_complexity_analysis()
-        print("✅ Complexity analysis completed")
+        print("[SUCCESS] Complexity analysis completed")
         
         # 3. Speed vs Accuracy Trade-off
-        print("🔄 Creating speed vs accuracy charts...")
+        print("[CREATING] Speed vs accuracy charts...")
         self.plot_speed_accuracy_tradeoff()
-        print("✅ Speed vs accuracy charts completed")
+        print("[SUCCESS] Speed vs accuracy charts completed")
         
         # 4. Confusion Matrices
-        print("🔄 Creating confusion matrices...")
+        print("[CREATING] Confusion matrices...")
         self.plot_confusion_matrices()
-        print("✅ Confusion matrices completed")
+        print("[SUCCESS] Confusion matrices completed")
         
         # 5. Per-Class Performance
-        print("🔄 Creating per-class performance charts...")
+        print("[CREATING] Per-class performance charts...")
         self.plot_per_class_performance()
-        print("✅ Per-class performance charts completed")
+        print("[SUCCESS] Per-class performance charts completed")
         
         # 6. Model Size Comparison
-        print("🔄 Creating model size comparison charts...")
+        print("[CREATING] Model size comparison charts...")
         self.plot_model_size_comparison()
-        print("✅ Model size comparison completed")
+        print("[SUCCESS] Model size comparison completed")
         
         # 7. Memory Usage Analysis
-        print("🔄 Creating memory usage analysis charts...")
+        print("[CREATING] Memory usage analysis charts...")
         self.plot_memory_analysis()
-        print("✅ Memory usage analysis completed")
+        print("[SUCCESS] Memory usage analysis completed")
         
-        print(f"\n🎉 All visualizations saved to {self.output_dir}/")
+        # 8. Time Complexity Analysis
+        print("[CREATING] Time complexity analysis charts...")
+        self.plot_time_complexity_analysis()
+        print("[SUCCESS] Time complexity analysis completed")
+        
+        print(f"\n[SUCCESS] All visualizations saved to {self.output_dir}/")
     
     def plot_performance_comparison(self):
         """Plot overall performance comparison"""
@@ -514,19 +532,75 @@ class ComprehensiveModelComparator:
         plt.savefig(f'{self.output_dir}/memory_analysis.png', dpi=300, bbox_inches='tight')
         plt.close()
     
+    def plot_time_complexity_analysis(self):
+        """Plot time complexity analysis"""
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 12))
+        
+        models = self.comparison_df['Model']
+        
+        # Time per image
+        time_per_image = self.comparison_df['Time per Image (s)']
+        bars1 = ax1.bar(models, time_per_image, color=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'])
+        ax1.set_title('Time per Image (Lower is Better)', fontsize=14, fontweight='bold')
+        ax1.set_ylabel('Time per Image (seconds)')
+        ax1.grid(True, alpha=0.3)
+        
+        for bar, time_val in zip(bars1, time_per_image):
+            ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.0001, 
+                    f'{time_val:.4f}s', ha='center', va='bottom', fontweight='bold')
+        
+        # Time per parameter
+        time_per_param = self.comparison_df['Time per Parameter (s)']
+        bars2 = ax2.bar(models, time_per_param, color=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'])
+        ax2.set_title('Time per Parameter (Lower is Better)', fontsize=14, fontweight='bold')
+        ax2.set_ylabel('Time per Parameter (seconds)')
+        ax2.set_yscale('log')  # Log scale for better visualization
+        ax2.grid(True, alpha=0.3)
+        
+        for bar, time_val in zip(bars2, time_per_param):
+            ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() * 1.5, 
+                    f'{time_val:.2e}s', ha='center', va='bottom', fontweight='bold')
+        
+        # Efficiency Score (Accuracy per second)
+        efficiency = self.comparison_df['Efficiency Score']
+        bars3 = ax3.bar(models, efficiency, color=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'])
+        ax3.set_title('Efficiency Score (Higher is Better)', fontsize=14, fontweight='bold')
+        ax3.set_ylabel('Efficiency (Accuracy per second)')
+        ax3.grid(True, alpha=0.3)
+        
+        for bar, eff in zip(bars3, efficiency):
+            ax3.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.1, 
+                    f'{eff:.2f}', ha='center', va='bottom', fontweight='bold')
+        
+        # Time vs Accuracy Trade-off
+        accuracies = self.comparison_df['Validation Accuracy']
+        scatter = ax4.scatter(time_per_image, accuracies, s=200, 
+                             c=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'], alpha=0.7)
+        for i, model in enumerate(models):
+            ax4.annotate(model, (time_per_image.iloc[i], accuracies.iloc[i]), 
+                        xytext=(5, 5), textcoords='offset points', fontweight='bold')
+        ax4.set_xlabel('Time per Image (seconds)')
+        ax4.set_ylabel('Validation Accuracy')
+        ax4.set_title('Time vs Accuracy Trade-off', fontsize=14, fontweight='bold')
+        ax4.grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig(f'{self.output_dir}/time_complexity_analysis.png', dpi=300, bbox_inches='tight')
+        plt.close()
+    
     def save_detailed_results(self):
         """Save detailed results to files"""
         print("\n" + "="*60)
-        print("💾 SAVING DETAILED RESULTS")
+        print("SAVING DETAILED RESULTS")
         print("="*60)
         
         # Save comparison dataframe
-        print("🔄 Saving comparison summary...")
+        print("[SAVING] Comparison summary...")
         self.comparison_df.to_csv(f'{self.output_dir}/model_comparison_summary.csv', index=False)
-        print(f"✅ Comparison summary saved to {self.output_dir}/model_comparison_summary.csv")
+        print(f"[SUCCESS] Comparison summary saved to {self.output_dir}/model_comparison_summary.csv")
         
         # Save detailed results as JSON
-        print("🔄 Saving detailed results...")
+        print("[SAVING] Detailed results...")
         detailed_results = {}
         for model_name, result in self.results.items():
             # Convert numpy arrays to lists for JSON serialization
@@ -534,18 +608,21 @@ class ComprehensiveModelComparator:
             result_copy['confusion_matrix'] = result['confusion_matrix']
             result_copy['predictions'] = result['predictions'].tolist()
             result_copy['true_labels'] = result['true_labels'].tolist()
+            # Convert numpy types to Python types
+            result_copy['total_parameters'] = int(result['total_parameters'])
+            result_copy['trainable_parameters'] = int(result['trainable_parameters'])
             detailed_results[model_name] = result_copy
         
         with open(f'{self.output_dir}/detailed_results.json', 'w') as f:
             json.dump(detailed_results, f, indent=2)
-        print(f"✅ Detailed results saved to {self.output_dir}/detailed_results.json")
+        print(f"[SUCCESS] Detailed results saved to {self.output_dir}/detailed_results.json")
         
         # Save per-class reports
-        print("🔄 Saving per-class reports...")
+        print("[SAVING] Per-class reports...")
         for model_name, result in self.results.items():
             class_report_df = pd.DataFrame(result['class_report']).transpose()
             class_report_df.to_csv(f'{self.output_dir}/{model_name.lower()}_class_report.csv')
-        print(f"✅ Per-class reports saved")
+        print(f"[SUCCESS] Per-class reports saved")
     
     def generate_final_report(self):
         """Generate final comprehensive report"""
@@ -556,49 +633,56 @@ class ComprehensiveModelComparator:
         # Sort by accuracy
         sorted_df = self.comparison_df.sort_values('Validation Accuracy', ascending=False)
         
-        print(f"\n🏆 MODEL RANKING (by Validation Accuracy):")
+        print(f"\n[BEST] MODEL RANKING (by Validation Accuracy):")
         print("-" * 80)
         for i, (_, row) in enumerate(sorted_df.iterrows(), 1):
             print(f"{i}. {row['Model']:<12} - Accuracy: {row['Validation Accuracy']:.4f} | "
                   f"F1: {row['F1-Score']:.4f} | Speed: {row['Inference Speed (img/s)']:.1f} img/s")
         
-        print(f"\n📊 BEST MODEL: {sorted_df.iloc[0]['Model']}")
+        print(f"\n[WINNER] BEST MODEL: {sorted_df.iloc[0]['Model']}")
         best_model = sorted_df.iloc[0]
         print(f"   Validation Accuracy: {best_model['Validation Accuracy']:.4f}")
         print(f"   F1-Score: {best_model['F1-Score']:.4f}")
         print(f"   Inference Speed: {best_model['Inference Speed (img/s)']:.1f} images/sec")
         print(f"   Total Parameters: {best_model['Total Parameters']:,}")
         
-        print(f"\n⚡ FASTEST MODEL: {sorted_df.loc[sorted_df['Inference Speed (img/s)'].idxmax(), 'Model']}")
+        print(f"\n[FASTEST] FASTEST MODEL: {sorted_df.loc[sorted_df['Inference Speed (img/s)'].idxmax(), 'Model']}")
         fastest_model = sorted_df.loc[sorted_df['Inference Speed (img/s)'].idxmax()]
         print(f"   Speed: {fastest_model['Inference Speed (img/s)']:.1f} images/sec")
         print(f"   Accuracy: {fastest_model['Validation Accuracy']:.4f}")
         
-        print(f"\n💾 MOST EFFICIENT MODEL: {sorted_df.loc[sorted_df['Memory Usage (MB)'].idxmin(), 'Model']}")
-        efficient_model = sorted_df.loc[sorted_df['Memory Usage (MB)'].idxmin()]
-        print(f"   Memory Usage: {efficient_model['Memory Usage (MB)']:.1f} MB")
+        print(f"\n[EFFICIENT] MOST EFFICIENT MODEL: {sorted_df.loc[sorted_df['Efficiency Score'].idxmax(), 'Model']}")
+        efficient_model = sorted_df.loc[sorted_df['Efficiency Score'].idxmax()]
+        print(f"   Efficiency Score: {efficient_model['Efficiency Score']:.2f} (accuracy/sec)")
+        print(f"   Time per Image: {efficient_model['Time per Image (s)']:.4f} seconds")
         print(f"   Accuracy: {efficient_model['Validation Accuracy']:.4f}")
         
+        print(f"\n[MEMORY] LEAST MEMORY USAGE: {sorted_df.loc[sorted_df['Memory Usage (MB)'].idxmin(), 'Model']}")
+        memory_efficient_model = sorted_df.loc[sorted_df['Memory Usage (MB)'].idxmin()]
+        print(f"   Memory Usage: {memory_efficient_model['Memory Usage (MB)']:.1f} MB")
+        print(f"   Accuracy: {memory_efficient_model['Validation Accuracy']:.4f}")
+        
         # Overfitting analysis
-        print(f"\n🔍 OVERFITTING ANALYSIS:")
+        print(f"\n[ANALYSIS] OVERFITTING ANALYSIS:")
         print("-" * 40)
         for _, row in sorted_df.iterrows():
             acc = row['Validation Accuracy']
             if acc > 0.9:
-                status = "✅ Excellent"
+                status = "[EXCELLENT]"
             elif acc > 0.8:
-                status = "✅ Good"
+                status = "[GOOD]"
             elif acc > 0.7:
-                status = "⚠️ Moderate"
+                status = "[MODERATE]"
             else:
-                status = "❌ Poor"
+                status = "[POOR]"
             print(f"{row['Model']:<12}: {acc:.4f} - {status}")
         
-        print(f"\n📁 All results saved in: {self.output_dir}/")
+        print(f"\n[FILES] All results saved in: {self.output_dir}/")
         print(f"   - model_comparison_summary.csv")
         print(f"   - detailed_results.json")
         print(f"   - *_class_report.csv")
         print(f"   - *.png (visualizations)")
+        print(f"   - time_complexity_analysis.png (NEW!)")
     
     def run_comprehensive_comparison(self):
         """Run the complete comprehensive comparison"""
