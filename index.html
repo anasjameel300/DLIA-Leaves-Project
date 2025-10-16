@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicinal Leaf Classifier - Educational Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>MedLeaf AI</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#classifier" class="nav-link">Classifier</a></li>
+                <li><a href="#plants" class="nav-link">Plant Database</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Discover the Power of 
+                    <span class="gradient-text">Medicinal Plants</span>
+                </h1>
+                <p class="hero-description">
+                    An AI-powered educational platform that helps you identify and learn about 
+                    medicinal plants through advanced machine learning technology.
+                </p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="scrollToSection('classifier')">
+                        <i class="fas fa-camera"></i>
+                        Identify Plant
+                    </button>
+                    <button class="btn btn-secondary" onclick="scrollToSection('plants')">
+                        <i class="fas fa-book"></i>
+                        Learn More
+                    </button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="floating-cards">
+                    <div class="card card-1">
+                        <i class="fas fa-brain"></i>
+                        <span>AI Powered</span>
+                    </div>
+                    <div class="card card-2">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Educational</span>
+                    </div>
+                    <div class="card card-3">
+                        <i class="fas fa-microscope"></i>
+                        <span>Scientific</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Classifier Section -->
+    <section id="classifier" class="classifier-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Plant Leaf Classifier</h2>
+                <p>Upload a leaf image and let our AI identify the medicinal plant</p>
+            </div>
+            
+            <div class="classifier-container">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Upload Leaf Image</h3>
+                        <p>Drag and drop your leaf image here or click to browse</p>
+                        <input type="file" id="leafImage" accept="image/*" hidden>
+                        <button class="btn btn-outline" onclick="document.getElementById('leafImage').click()">
+                            Choose File
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="image-preview" id="imagePreview" style="display: none;">
+                    <img id="previewImg" alt="Leaf preview">
+                    <div class="preview-actions">
+                        <button class="btn btn-primary" onclick="classifyLeaf()">
+                            <i class="fas fa-search"></i>
+                            Classify Plant
+                        </button>
+                        <button class="btn btn-outline" onclick="clearImage()">
+                            <i class="fas fa-times"></i>
+                            Clear
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="results" id="results" style="display: none;">
+                    <div class="result-header">
+                        <h3>Classification Results</h3>
+                        <div class="confidence-meter">
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidenceFill"></div>
+                            </div>
+                            <span class="confidence-text" id="confidenceText">0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="result-content">
+                        <div class="plant-info">
+                            <h4 id="plantName">Plant Name</h4>
+                            <p id="plantDescription">Plant description will appear here...</p>
+                        </div>
+                        
+                        <div class="top-predictions">
+                            <h5>Top Predictions</h5>
+                            <div class="predictions-list" id="predictionsList">
+                                <!-- Predictions will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Plant Database Section -->
+    <section id="plants" class="plants-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Medicinal Plant Database</h2>
+                <p>Explore our comprehensive collection of medicinal plants</p>
+            </div>
+            
+            <div class="search-bar">
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="plantSearch" placeholder="Search for a plant...">
+                </div>
+            </div>
+            
+            <div class="plants-grid" id="plantsGrid">
+                <!-- Plant cards will be populated here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>About MedLeaf AI</h2>
+                    <p>
+                        MedLeaf AI is an educational platform that combines artificial intelligence 
+                        with botanical knowledge to help students, researchers, and plant enthusiasts 
+                        identify and learn about medicinal plants.
+                    </p>
+                    <p>
+                        Our system uses state-of-the-art deep learning models including VGG19, 
+                        ResNet50, DenseNet121, and MobileNet to achieve high accuracy in plant 
+                        classification.
+                    </p>
+                    <div class="features">
+                        <div class="feature">
+                            <i class="fas fa-robot"></i>
+                            <h4>AI-Powered</h4>
+                            <p>Advanced machine learning algorithms</p>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-graduation-cap"></i>
+                            <h4>Educational</h4>
+                            <p>Learn about medicinal properties</p>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-chart-line"></i>
+                            <h4>Accurate</h4>
+                            <p>High precision classification</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-stats">
+                    <div class="stat">
+                        <h3>20+</h3>
+                        <p>Plant Species</p>
+                    </div>
+                    <div class="stat">
+                        <h3>95%+</h3>
+                        <p>Accuracy</p>
+                    </div>
+                    <div class="stat">
+                        <h3>4</h3>
+                        <p>AI Models</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>MedLeaf AI</h4>
+                    <p>Empowering education through AI-driven plant identification.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#classifier">Classifier</a></li>
+                        <li><a href="#plants">Plant Database</a></li>
+                        <li><a href="#about">About</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>For educational inquiries and support</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 MedLeaf AI. Educational Platform.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Analyzing your leaf image...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
