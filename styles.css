@@ -319,6 +319,36 @@ body {
     margin-bottom: 1.5rem;
 }
 
+.model-selection {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.model-selection label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.model-dropdown {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    font-size: 1rem;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 250px;
+}
+
+.model-dropdown:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
 .preview-actions {
     display: flex;
     gap: 1rem;

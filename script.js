@@ -237,19 +237,109 @@ function clearImage() {
     leafImage.value = '';
 }
 
-// Classification functionality (placeholder for now)
-function classifyLeaf() {
+// Classification functionality with real API integration
+async function classifyLeaf() {
     // Show loading overlay
     loadingOverlay.style.display = 'flex';
     
-    // Simulate API call (replace with actual model inference)
-    setTimeout(() => {
+    try {
+        // Get the image data
+        const imageData = previewImg.src;
+        
+        // Get selected model
+        const selectedModel = document.getElementById('modelSelect').value;
+        
+        console.log('Sending classification request...');
+        console.log('Model:', selectedModel);
+        console.log('Image data length:', imageData.length);
+        
+        // Call the backend API
+        const response = await fetch('http://localhost:5000/classify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                image: imageData,
+                model: selectedModel
+            })
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('API Error:', errorText);
+            throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+        }
+        
+        const result = await response.json();
+        console.log('API Response:', result);
+        
         // Hide loading overlay
         loadingOverlay.style.display = 'none';
         
-        // Show results (placeholder data)
-        showResults('Aloevera', 0.95);
-    }, 2000);
+        if (result.success) {
+            // Show results with real data
+            showRealResults(result);
+        } else {
+            throw new Error(result.error || 'Classification failed');
+        }
+        
+    } catch (error) {
+        console.error('Classification error:', error);
+        
+        // Hide loading overlay
+        loadingOverlay.style.display = 'none';
+        
+        // Show error message
+        alert('Classification failed: ' + error.message);
+    }
+}
+
+// New function to handle real API results
+function showRealResults(apiResult) {
+    const topPrediction = apiResult.predictions[0];
+    const plantName = topPrediction.class;
+    const confidence = topPrediction.confidence;
+    
+    const plantInfo = plantDatabase[plantName];
+    
+    // Update plant name and description
+    document.getElementById('plantName').textContent = plantInfo ? plantInfo.name : plantName;
+    document.getElementById('plantDescription').textContent = plantInfo ? plantInfo.description : `This appears to be a ${plantName} leaf.`;
+    
+    // Update confidence meter
+    const confidenceFill = document.getElementById('confidenceFill');
+    const confidenceText = document.getElementById('confidenceText');
+    const confidencePercent = Math.round(confidence * 100);
+    
+    confidenceFill.style.width = confidencePercent + '%';
+    confidenceText.textContent = confidencePercent + '%';
+    
+    // Generate top predictions from API results
+    const predictionsList = document.getElementById('predictionsList');
+    predictionsList.innerHTML = '';
+    
+    apiResult.predictions.forEach(prediction => {
+        const predictionItem = document.createElement('div');
+        predictionItem.className = 'prediction-item';
+        predictionItem.innerHTML = `
+            <span class="prediction-name">${prediction.class}</span>
+            <span class="prediction-confidence">${prediction.percentage}%</span>
+        `;
+        predictionsList.appendChild(predictionItem);
+    });
+    
+    // Add model info
+    const resultHeader = document.querySelector('.result-header h3');
+    resultHeader.textContent = `Classification Results (${apiResult.model_name})`;
+    
+    // Show results
+    results.style.display = 'block';
+    
+    // Scroll to results
+    results.scrollIntoView({ behavior: 'smooth' });
 }
 
 function showResults(plantName, confidence) {

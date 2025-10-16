@@ -95,6 +95,15 @@
                 
                 <div class="image-preview" id="imagePreview" style="display: none;">
                     <img id="previewImg" alt="Leaf preview">
+                    <div class="model-selection">
+                        <label for="modelSelect">Choose AI Model:</label>
+                        <select id="modelSelect" class="model-dropdown">
+                            <option value="densenet121">DenseNet121 (Recommended)</option>
+                            <option value="vgg19">VGG19</option>
+                            <option value="resnet50">ResNet50</option>
+                            <option value="mobilenet">MobileNet</option>
+                        </select>
+                    </div>
                     <div class="preview-actions">
                         <button class="btn btn-primary" onclick="classifyLeaf()">
                             <i class="fas fa-search"></i>
