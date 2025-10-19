@@ -1,6 +1,8 @@
 # Database/Dataset folders
 medicinal plant leaf set/
 removed background/
+workflow/
+comparison_data/
 
 # Model results and outputs
 vgg19_results/
