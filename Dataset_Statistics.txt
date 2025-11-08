@@ -1,0 +1,106 @@
+================================================================================
+                    DATASET STATISTICS - LEAF CLASSIFICATION
+================================================================================
+
+OVERALL STATISTICS
+------------------
+Total Number of Classes: 20
+Total Number of Images: 5,261
+Training Images: 4,215 (80%)
+Validation Images: 1,046 (20%)
+
+================================================================================
+IMAGES PER CLASS - DETAILED BREAKDOWN
+================================================================================
+
+Class Name              | Validation | Training | Total Images
+------------------------|------------|----------|-------------
+1.  Aloevera            |     60     |   240    |    300
+2.  Amla                |     40     |   160    |    200
+3.  Bamboo              |     52     |   208    |    260
+4.  Bhrami              |     62     |   248    |    310
+5.  Bringaraja          |     40     |   160    |    200
+6.  Castor              |     63     |   252    |    315
+7.  Coffee              |     45     |   180    |    225
+8.  Coriender           |     57     |   228    |    285
+9.  Curry               |     64     |   256    |    320
+10. Eucalyptus          |     42     |   168    |    210
+11. Ginger              |     40     |   160    |    200
+12. Guava               |     62     |   248    |    310
+13. Henna               |     45     |   180    |    225
+14. Hibiscus            |     58     |   232    |    290
+15. Lemon               |     55     |   220    |    275
+16. Mint                |     69     |   276    |    345
+17. Neem                |     51     |   204    |    255
+18. Onion               |     26     |   104    |    130
+19. Palak(Spinach)      |     68     |   272    |    340
+20. Papaya              |     47     |   188    |    235
+
+================================================================================
+CLASS DISTRIBUTION SUMMARY
+================================================================================
+
+Largest Classes (Most Images):
+1. Mint: 345 images
+2. Palak(Spinach): 340 images
+3. Castor: 315 images
+4. Bhrami: 310 images
+5. Guava: 310 images
+
+Smallest Classes (Least Images):
+1. Onion: 130 images
+2. Amla: 200 images
+3. Bringaraja: 200 images
+4. Ginger: 200 images
+5. Coffee: 225 images
+
+Average Images per Class: 263 images
+Median Images per Class: 260 images
+
+================================================================================
+IMBALANCE ANALYSIS
+================================================================================
+
+The dataset is slightly imbalanced:
+- Largest class (Mint): 345 images
+- Smallest class (Onion): 130 images
+- Ratio: 2.65:1 (largest to smallest)
+
+This imbalance is moderate and should not significantly affect model performance,
+especially with data augmentation applied during training.
+
+================================================================================
+TRAINING/VALIDATION SPLIT
+================================================================================
+
+Split Ratio: 80% Training / 20% Validation
+- This is a standard split for deep learning projects
+- Training set: Used to teach the model
+- Validation set: Used to check model performance during training
+
+All classes maintain the same 80/20 split proportion.
+
+================================================================================
+CLASS NAMES (Alphabetical Order)
+================================================================================
+
+1. Aloevera
+2. Amla
+3. Bamboo
+4. Bhrami
+5. Bringaraja
+6. Castor
+7. Coffee
+8. Coriender
+9. Curry
+10. Eucalyptus
+11. Ginger
+12. Guava
+13. Henna
+14. Hibiscus
+15. Lemon
+16. Mint
+17. Neem
+18. Onion
+19. Palak(Spinach)
+20. Papaya
