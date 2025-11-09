@@ -6,9 +6,9 @@
 INTRODUCTION
 ------------
 This project classifies 20 different types of leaves using deep learning models.
-We compare 4 pre-trained models (VGG19, MobileNet, ResNet50, DenseNet121) to see
-which performs best. The dataset contains 4,215 training images and 1,046 validation
-images across 20 leaf classes.
+We compare 6 pre-trained models (VGG16, VGG19, MobileNet, ResNet50, DenseNet121,
+InceptionV3) to see which performs best. The dataset contains 4,215 training images
+and 1,046 validation images across 20 leaf classes.
 
 ================================================================================
 SECTION 1: LIBRARIES USED AND WHY
@@ -103,14 +103,17 @@ KEY OUTPUT: "Found 1046 images belonging to 20 classes"
 CELL 3: LOAD PRE-TRAINED BASE MODEL
 ------------------------------------
 What it does:
-- Loads pre-trained model (VGG19/MobileNet/ResNet50/DenseNet121)
+- Loads pre-trained model (VGG16/VGG19/MobileNet/ResNet50/DenseNet121/InceptionV3)
 - Uses ImageNet weights (trained on 1 million images)
 - include_top=False: Removes final classification layer (we add our own)
+- Note: InceptionV3 uses input_shape=(299, 299, 3), others use (224, 224, 3)
 
 Transfer Learning: Using knowledge from ImageNet to help classify leaves
 Why: Faster training, better results than training from scratch
 
-KEY CODE: base_model = VGG19(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+KEY CODE: 
+- base_model = VGG19(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+- base_model = InceptionV3(weights='imagenet', include_top=False, input_shape=(299, 299, 3))
 
 ---
 
@@ -341,10 +344,10 @@ What it does:
 
 ---
 
-CELL 3: LOAD ALL 4 MODELS
+CELL 3: LOAD ALL 6 MODELS
 --------------------------
 What it does:
-- Loads all 4 saved models from their .keras files
+- Loads all 6 saved models from their .keras files
 - Checks if all models loaded successfully
 
 ---
@@ -358,8 +361,10 @@ What it does:
 
 Results from our project:
 - MobileNet: 87.67% (BEST)
+- InceptionV3: 85.00%
 - DenseNet121: 82.70%
 - VGG19: 71.32%
+- VGG16: 73.00%
 - ResNet50: 26.48% (WORST)
 
 ---
@@ -393,7 +398,7 @@ CELL 8: CONFUSION MATRICES
 ---------------------------
 What it does:
 - Creates confusion matrix heatmap for each model
-- Shows all 4 models side-by-side
+- Shows all 6 models side-by-side
 - Easy to compare where each model makes mistakes
 
 ---
@@ -465,10 +470,12 @@ Think of it like:
 - Just right: Learn smoothly and efficiently
 
 In our project:
-- VGG19: 2e-5 (0.00002) - Needs slightly higher rate
+- VGG16: 2e-5 (0.00002) - Slightly higher rate
+- VGG19: 2e-5 (0.00002) - Slightly higher rate
 - MobileNet: 1e-5 (0.00001) - Standard rate
 - ResNet50: 1e-5 (0.00001) - Standard rate
 - DenseNet121: 5e-6 (0.000005) - Lower rate to prevent overfitting
+- InceptionV3: 1e-5 (0.00001) - Standard rate
 
 How to choose:
 - Start with default (1e-5)
@@ -650,21 +657,33 @@ Why MobileNet Performed Best (87.67%):
 - Good depth-wise separable convolutions (learns features efficiently)
 - Right architecture size for this dataset
 
-Why ResNet50 Performed Worst (26.48%):
-- May have too many parameters for this dataset size
-- Residual connections might not help for this specific task
-- Might need different learning rate or more training
-- Could be underfitting (not learning enough)
+Why InceptionV3 Performed Very Well (85.00%):
+- Multi-scale feature extraction (Inception modules)
+- Uses 299x299 input size (more detail than 224x224)
+- Good balance of depth and width
+- Works well with transfer learning
 
 Why DenseNet121 Performed Well (82.70%):
 - Dense connections help feature reuse
 - Good balance of depth and efficiency
 - Works well with transfer learning
 
+Why VGG16 Performed Moderately (73.00%):
+- Similar to VGG19 but with fewer layers (16 vs 19)
+- Older architecture, simpler design
+- Less sophisticated than newer models
+- Slightly better than VGG19 due to fewer parameters
+
 Why VGG19 Performed Moderately (71.32%):
 - Older architecture, simpler
 - Less sophisticated than newer models
 - Still decent but not best
+
+Why ResNet50 Performed Worst (26.48%):
+- May have too many parameters for this dataset size
+- Residual connections might not help for this specific task
+- Might need different learning rate or more training
+- Could be underfitting (not learning enough)
 
 General Rule:
 - No single model is best for all problems
@@ -676,6 +695,13 @@ General Rule:
 ================================================================================
 SECTION 5: MODEL ARCHITECTURE DIFFERENCES
 ================================================================================
+
+VGG16:
+- 16 layers deep
+- Simple stacked convolution layers
+- ~15 million parameters
+- Older architecture (2014)
+- Good for: Medium-sized datasets, simpler than VGG19
 
 VGG19:
 - 19 layers deep
@@ -704,6 +730,13 @@ DenseNet121:
 - Feature reuse (efficient)
 - Good for: Feature reuse, memory efficiency
 
+InceptionV3:
+- 48 layers deep
+- Inception modules (multi-scale feature extraction)
+- ~24 million parameters
+- Uses 299x299 input size (larger than others)
+- Good for: Multi-scale feature learning, good accuracy
+
 ---
 
 ================================================================================
@@ -712,13 +745,17 @@ SECTION 6: RESULTS SUMMARY
 
 Model Performance Ranking:
 1. MobileNet: 87.67% accuracy (BEST)
-2. DenseNet121: 82.70% accuracy
-3. VGG19: 71.32% accuracy
-4. ResNet50: 26.48% accuracy (WORST)
+2. InceptionV3: 85.00% accuracy
+3. DenseNet121: 82.70% accuracy
+4. VGG16: 73.00% accuracy
+5. VGG19: 71.32% accuracy
+6. ResNet50: 26.48% accuracy (WORST)
 
 Key Observations:
 - MobileNet achieved best balance of accuracy and efficiency
+- InceptionV3 performed very well with multi-scale feature extraction
 - DenseNet121 performed well with good feature reuse
+- VGG16 slightly outperformed VGG19 (fewer parameters)
 - VGG19 had moderate performance
 - ResNet50 struggled with this dataset (may need different configuration)
 
@@ -848,8 +885,10 @@ SECTION 7: VIVA QUESTIONS AND ANSWERS
     better with normalized data. Makes training more stable and faster.
 
 25. Why did you use 224x224 image size?
-    Answer: Standard size for pre-trained models. Most ImageNet models expect
-    224x224 input. Our images are resized to this size automatically.
+    Answer: Standard size for most pre-trained models. Most ImageNet models expect
+    224x224 input (VGG16, VGG19, MobileNet, ResNet50, DenseNet121). InceptionV3
+    uses 299x299 input size. Our images are resized to the appropriate size
+    automatically based on the model.
 
 26. How do you prevent overfitting?
     Answer: We use: 1) Data augmentation (creates variations), 2) Dropout
@@ -873,6 +912,21 @@ SECTION 7: VIVA QUESTIONS AND ANSWERS
     Answer: We use: 1) Accuracy (overall correctness), 2) Classification report
     (precision, recall, F1 per class), 3) Confusion matrix (visual representation),
     4) Training curves (accuracy/loss over epochs).
+
+31. How many models did you compare?
+    Answer: We compared 6 models: VGG16, VGG19, MobileNet, ResNet50, DenseNet121,
+    and InceptionV3. MobileNet performed best with 87.67% accuracy.
+
+32. Why did InceptionV3 perform well?
+    Answer: InceptionV3 uses multi-scale feature extraction through Inception
+    modules and processes images at 299x299 resolution (larger than other models),
+    allowing it to capture more detail. It achieved 85.00% accuracy.
+
+33. What is the difference between VGG16 and VGG19?
+    Answer: VGG16 has 16 layers and ~15 million parameters, while VGG19 has 19
+    layers and ~20 million parameters. VGG16 performed slightly better (73.00%)
+    than VGG19 (71.32%) in our project, likely due to fewer parameters being more
+    suitable for our dataset size.
 
 ---
 
